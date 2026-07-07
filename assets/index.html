@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Current Folder Files</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    li {
+        margin: 8px 0;
+    }
+
+    a {
+        text-decoration: none;
+        color: #0066cc;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+</head>
+<body>
+
+<h2>Files in Current Folder</h2>
+
+<ul id="fileList">
+    <li>Loading...</li>
+</ul>
+
+<script>
+fetch("./")
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        const links = [...doc.querySelectorAll("a")]
+            .map(a => a.getAttribute("href"))
+            .filter(href =>
+                href &&
+                href !== "../" &&
+                href !== "./"
+            );
+
+        const list = document.getElementById("fileList");
+        list.innerHTML = "";
+
+        links.forEach(file => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${file}">${file}</a>`;
+            list.appendChild(li);
+        });
+
+        if (!links.length) {
+            list.innerHTML = "<li>No files found.</li>";
+        }
+    })
+    .catch(() => {
+        document.getElementById("fileList").innerHTML =
+            "<li>Directory listing is not enabled.</li>";
+    });
+</script>
+
+</body>
+</html>
