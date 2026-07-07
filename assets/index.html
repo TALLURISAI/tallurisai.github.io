@@ -1,73 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Current Folder Files</title>
+<title>Assets Files</title>
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 40px;
-    }
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+}
 
-    ul {
-        list-style: none;
-        padding: 0;
-    }
+h2 {
+    text-align: center;
+}
 
-    li {
-        margin: 8px 0;
-    }
+ul {
+    list-style: none;
+    padding: 0;
+}
 
-    a {
-        text-decoration: none;
-        color: #0066cc;
-    }
+li {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
 
-    a:hover {
-        text-decoration: underline;
-    }
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
 </style>
+
 </head>
+
 <body>
 
-<h2>Files in Current Folder</h2>
+<h2>Files Available in Assets</h2>
 
 <ul id="fileList">
-    <li>Loading...</li>
+    <li>Loading files...</li>
 </ul>
 
+
 <script>
-fetch("./")
-    .then(response => response.text())
-    .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
 
-        const links = [...doc.querySelectorAll("a")]
-            .map(a => a.getAttribute("href"))
-            .filter(href =>
-                href &&
-                href !== "../" &&
-                href !== "./"
-            );
+const username = "tallurisai";
+const repo = "tallurisai.github.io";
+const folderPath = "assets";
 
-        const list = document.getElementById("fileList");
-        list.innerHTML = "";
 
-        links.forEach(file => {
+fetch(`https://api.github.com/repos/${username}/${repo}/contents/${folderPath}`)
+.then(response => response.json())
+.then(files => {
+
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+
+    files.forEach(file => {
+
+        if (file.type === "file") {
+
             const li = document.createElement("li");
-            li.innerHTML = `<a href="${file}">${file}</a>`;
-            list.appendChild(li);
-        });
 
-        if (!links.length) {
-            list.innerHTML = "<li>No files found.</li>";
+            li.innerHTML = `
+                <a href="${file.download_url}" target="_blank">
+                    ${file.name}
+                </a>
+            `;
+
+            list.appendChild(li);
         }
-    })
-    .catch(() => {
-        document.getElementById("fileList").innerHTML =
-            "<li>Directory listing is not enabled.</li>";
+
     });
+
+    if(list.innerHTML === "") {
+        list.innerHTML = "<li>No files found in assets folder.</li>";
+    }
+
+})
+.catch(error => {
+
+    document.getElementById("fileList").innerHTML =
+    "<li>Unable to load files from assets folder.</li>";
+
+});
+
 </script>
 
 </body>
